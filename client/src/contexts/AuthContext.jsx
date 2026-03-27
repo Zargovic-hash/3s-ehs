@@ -19,8 +19,21 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const data = await authService.login(email, password);
-      setUser(data.user);
-      return { success: true, user: data.user };
+      const nextUser = data?.user;
+      if (!nextUser) {
+        return {
+          success: false,
+          error: "Réponse serveur invalide (utilisateur manquant). Vérifiez l'URL API et le backend.",
+        };
+      }
+      if (!nextUser.role) {
+        return {
+          success: false,
+          error: "Réponse serveur invalide (role manquant). Vérifiez l'API d'authentification.",
+        };
+      }
+      setUser(nextUser);
+      return { success: true, user: nextUser };
     } catch (error) {
       return { 
         success: false, 
@@ -37,6 +50,12 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const data = await authService.register(userData);
+      // Some APIs auto-login on register; if so, keep UI consistent.
+      if (data?.token) localStorage.setItem('token', data.token);
+      if (data?.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+      }
       return { success: true, data };
     } catch (error) {
       const validationError = error.response?.data?.errors?.[0]?.msg;

@@ -13,7 +13,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   if (isAuthenticated()) {
-    return <Navigate to={user.role === 'admin' ? '/admin' : '/client'} replace />;
+    return <Navigate to={user?.role === 'admin' ? '/admin' : '/client'} replace />;
   }
 
   const handleSubmit = async (e) => {
@@ -22,7 +22,7 @@ const Login = () => {
     setLoading(true);
     const result = await login(email, password);
     if (result.success) {
-      navigate(result.user.role === 'admin' ? '/admin' : '/client');
+      navigate(result.user?.role === 'admin' ? '/admin' : '/client');
     } else {
       setError(result.error);
     }
