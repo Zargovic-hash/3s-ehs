@@ -18,8 +18,8 @@
     "postcss": "^8.4.32"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "npm install --prefix client && npm run build --prefix client",
-    "preview": "vite preview"
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview"
   }
 }
