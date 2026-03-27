@@ -20,11 +20,19 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const result = await login(email, password);
-    if (result.success) {
-      navigate(result.user?.role === 'admin' ? '/admin' : '/client');
-    } else {
-      setError(result.error);
+    try {
+      const result = await login(email, password);
+      if (!result) {
+        setError('Erreur de connexion');
+        return;
+      }
+      if (result.success) {
+        navigate(result.user?.role === 'admin' ? '/admin' : '/client');
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError(err?.message || 'Erreur de connexion');
     }
     setLoading(false);
   };

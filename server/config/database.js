@@ -3,10 +3,24 @@ require('dotenv').config();
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+const shouldUseSsl =
+  isProduction && (process.env.DB_SSL !== 'false' && process.env.DB_SSL !== '0');
+const rejectUnauthorized =
+  process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false' &&
+  process.env.DB_SSL_REJECT_UNAUTHORIZED !== '0';
+const sslCa = process.env.DB_SSL_CA;
+
 const poolConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
-      ...(isProduction ? { ssl: { rejectUnauthorized: false } } : {}),
+      ...(shouldUseSsl
+        ? {
+            ssl: {
+              rejectUnauthorized,
+              ...(sslCa ? { ca: sslCa } : {}),
+            },
+          }
+        : {}),
     }
   : {
       host: process.env.DB_HOST || 'localhost',
@@ -30,7 +44,8 @@ pool.on('connect', () => {
 
 pool.on('error', (err) => {
   console.error('❌ Erreur PostgreSQL:', err);
-  process.exit(-1);
+  // In production, avoid killing the process on transient DB issues.
+  if (!isProduction) process.exit(-1);
 });
 
 module.exports = {

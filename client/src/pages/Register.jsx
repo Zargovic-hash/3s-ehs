@@ -26,16 +26,24 @@ const Register = () => {
     setError('');
     setSuccess('');
     setLoading(true);
-    const result = await register(form);
-    setLoading(false);
+    try {
+      const result = await register(form);
+      if (!result) {
+        setError("Erreur d'inscription");
+        return;
+      }
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
 
-    if (!result.success) {
-      setError(result.error);
-      return;
+      setSuccess('Compte créé avec succès. Vous pouvez vous connecter.');
+      setTimeout(() => navigate('/login'), 1200);
+    } catch (err) {
+      setError(err?.message || "Erreur d'inscription");
+    } finally {
+      setLoading(false);
     }
-
-    setSuccess('Compte créé avec succès. Vous pouvez vous connecter.');
-    setTimeout(() => navigate('/login'), 1200);
   };
 
   return (

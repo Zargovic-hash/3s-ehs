@@ -199,12 +199,12 @@ export default function Header() {
             {isAuthenticated() ? (
               <>
                 <Link
-                  to={user.role === 'admin' ? '/admin' : '/client'}
+                  to={user?.role === 'admin' ? '/admin' : '/client'}
                   className="btn-ghost flex items-center gap-2"
                   style={{ fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.5rem 1rem' }}
                 >
-                  {user.role === 'admin' ? <LayoutDashboard size={13} /> : <FileText size={13} />}
-                  {user.role === 'admin' ? 'Admin' : 'Mes docs'}
+                  {user?.role === 'admin' ? <LayoutDashboard size={13} /> : <FileText size={13} />}
+                  {user?.role === 'admin' ? 'Admin' : 'Mes docs'}
                 </Link>
                 <button
                   onClick={handleLogout}

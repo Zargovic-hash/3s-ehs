@@ -8,21 +8,42 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 async function initializeStorage() {
-  try {
-    await db.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS password_reset_tokens (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        token_hash VARCHAR(255) NOT NULL UNIQUE,
-        expires_at TIMESTAMP NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await db.query('CREATE UNIQUE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id)');
-  } catch (error) {
-    console.error('Erreur initialisation password_reset_tokens:', error);
+  // Render/managed Postgres can take a few seconds after deploy.
+  // We retry a bit to avoid boot flakiness.
+  const maxAttempts = parseInt(process.env.DB_INIT_MAX_ATTEMPTS || '6', 10);
+  const baseDelayMs = parseInt(process.env.DB_INIT_BASE_DELAY_MS || '600', 10);
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await db.query('SELECT 1');
+      await db.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          token_hash VARCHAR(255) NOT NULL UNIQUE,
+          expires_at TIMESTAMP NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      await db.query(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id)'
+      );
+      return;
+    } catch (error) {
+      const isLast = attempt === maxAttempts;
+      console.error(
+        `Erreur initialisation password_reset_tokens (tentative ${attempt}/${maxAttempts}):`,
+        error
+      );
+      if (isLast) return;
+      // exponential backoff with cap
+      const delay = Math.min(baseDelayMs * 2 ** (attempt - 1), 8000);
+      await sleep(delay);
+    }
   }
 }
 
@@ -92,7 +113,10 @@ app.use((err, req, res, next) => {
 
 // Démarrage du serveur
 async function startServer() {
-  await initializeStorage();
+  // Optional: skip DB schema init in multi-instance deployments.
+  if (process.env.SKIP_DB_INIT !== 'true' && process.env.SKIP_DB_INIT !== '1') {
+    await initializeStorage();
+  }
   app.listen(PORT, () => {
     console.log('═══════════════════════════════════════════════');
     console.log("🌿 Bureau d'Études Environnemental - API Server");
