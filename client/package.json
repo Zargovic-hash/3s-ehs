@@ -19,7 +19,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm install --prefix client && npm run build --prefix client",
     "preview": "vite preview"
   }
 }
