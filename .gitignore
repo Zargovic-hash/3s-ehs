@@ -37,3 +37,9 @@ coverage/
 # Misc
 *.orig
 .cache/
+
+.archirecture.md
+.features.md
+.project_summuary.md
+.readme.md
+.quick_start.md
