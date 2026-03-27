@@ -1,5 +1,10 @@
 import axios from 'axios';
 
+const getAuthStorage = () => {
+  const mode = (import.meta.env.VITE_AUTH_STORAGE || 'local').toLowerCase();
+  return mode === 'session' ? window.sessionStorage : window.localStorage;
+};
+
 // Axios instance
 const api = axios.create({
   // In dev/proxy: '/api'. In production (frontend hosted separately), set VITE_API_BASE_URL to your backend URL.
@@ -9,7 +14,7 @@ const api = axios.create({
 
 // ── JWT interceptor ──
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = getAuthStorage().getItem('token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -19,8 +24,9 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      const storage = getAuthStorage();
+      storage.removeItem('token');
+      storage.removeItem('user');
       window.location.href = '/login';
     }
     return Promise.reject(err);
@@ -31,18 +37,38 @@ api.interceptors.response.use(
 //  Auth Service
 // ════════════════════════════════════════
 export const authService = {
+  _validateAuthPayload: (data) => {
+    // If we got HTML or other non-JSON, it's almost always a wrong base URL.
+    if (typeof data !== 'object' || data === null) {
+      throw new Error(
+        "Réponse inattendue (non-JSON). Vérifiez VITE_API_BASE_URL = https://threes-ehs-server.onrender.com/api"
+      );
+    }
+    // If API returns a JSON error payload, surface it.
+    if (typeof data.error === 'string' && !data.user) {
+      throw new Error(data.error);
+    }
+    if (!data.user) {
+      throw new Error('Réponse serveur invalide (utilisateur manquant).');
+    }
+    return data;
+  },
+  _persistAuth: (data) => {
+    const storage = getAuthStorage();
+    if (data.token) storage.setItem('token', data.token);
+    storage.setItem('user', JSON.stringify(data.user));
+  },
   login: async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
-    // ✅ Stocker le token et l'utilisateur dans localStorage
-    if (res.data.token) localStorage.setItem('token', res.data.token);
-    if (res.data.user) localStorage.setItem('user', JSON.stringify(res.data.user));
-    return res.data;
+    const data = authService._validateAuthPayload(res.data);
+    authService._persistAuth(data);
+    return data;
   },
   register: async (userData) => {
     const res = await api.post('/auth/register', userData);
-    if (res.data.token) localStorage.setItem('token', res.data.token);
-    if (res.data.user) localStorage.setItem('user', JSON.stringify(res.data.user));
-    return res.data;
+    const data = authService._validateAuthPayload(res.data);
+    authService._persistAuth(data);
+    return data;
   },
   forgotPassword: async (email) => {
     const res = await api.post('/auth/forgot-password', { email });
@@ -66,11 +92,12 @@ export const authService = {
   },
   // ✅ FIX: logout() était appelé dans AuthContext mais n'existait pas
   logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    const storage = getAuthStorage();
+    storage.removeItem('token');
+    storage.removeItem('user');
   },
   getCurrentUser: () => {
-    const user = localStorage.getItem('user');
+    const user = getAuthStorage().getItem('user');
     return user ? JSON.parse(user) : null;
   },
 };
@@ -191,8 +218,8 @@ export const userService = {
     const res = await api.delete(`/users/${id}`);
     return res.data;
   },
-  resetPassword: async (id, password) => {
-    const res = await api.post(`/users/${id}/reset-password`, { newPassword: password });
+  resetPassword: async (id, newPassword) => {
+    const res = await api.post(`/users/${id}/reset-password`, { newPassword });
     return res.data;
   },
   getStats: async () => {
