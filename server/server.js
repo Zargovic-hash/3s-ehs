@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const db = require('./config/database');
 require('dotenv').config();
 
@@ -56,12 +57,21 @@ app.get('/api/health', (req, res) => {
 // Sans ce bloc, seules les routes /api fonctionnent une fois déployé.
 if (process.env.NODE_ENV === 'production') {
   const clientBuildPath = path.join(__dirname, '../client/dist');
-  app.use(express.static(clientBuildPath));
+  const clientIndexHtml = path.join(clientBuildPath, 'index.html');
 
-  // Toutes les routes non-API renvoient index.html (React Router)
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
-  });
+  if (fs.existsSync(clientIndexHtml)) {
+    app.use(express.static(clientBuildPath));
+
+    // Toutes les routes non-API renvoient index.html (React Router)
+    app.get('*', (req, res) => {
+      res.sendFile(clientIndexHtml);
+    });
+  } else {
+    console.warn(
+      `⚠️ Frontend build introuvable: ${clientIndexHtml}. ` +
+        `Le service backend n'exposera que /api.`
+    );
+  }
 }
 
 // Gestion des erreurs 404 (uniquement en dev, en prod c'est React qui gère)
