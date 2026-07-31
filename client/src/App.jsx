@@ -19,6 +19,7 @@ import AdminDashboard from './pages/AdminDashboard';
 
 // New Pages
 import Services from './pages/Services';
+import Produits from './pages/Produits';
 import About from './pages/About';
 import ArticlePage from './pages/ArticlePage';
 
@@ -39,6 +40,7 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/services" element={<Services />} />
+              <Route path="/produits" element={<Produits />} />
               <Route path="/webapp" element={<Navigate to="/client" replace />} />
               <Route path="/about" element={<About />} />
 

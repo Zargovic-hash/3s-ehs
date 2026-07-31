@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu, X, LogIn, LogOut, FileText, LayoutDashboard,
   ChevronDown, Shield, Leaf, Wind, Droplets, Flame,
-  Lock, Globe, Users, ArrowRight
+  Lock, Globe, Users, ArrowRight, Database, FlaskConical, HardHat
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -20,11 +20,19 @@ const serviceItems = [
   { Icon: Flame, label: 'Veille Réglementaire', abbr: 'Veille', to: '/services#veille' },
 ];
 
+const productItems = [
+  { Icon: Database, label: 'Reglo+', abbr: 'Conformité EHS', to: '/produits#reglo-plus' },
+  { Icon: FlaskConical, label: 'Produits Chimiques Dangereux', abbr: 'Autorisations', to: '/produits#chimique' },
+  { Icon: HardHat, label: 'Permis de Travail Digital', abbr: 'Sécurité', to: '/produits#permis-travail' },
+];
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
   const dropRef = useRef(null);
+  const dropRefProducts = useRef(null);
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,13 +46,14 @@ export default function Header() {
   useEffect(() => {
     const handleClick = (e) => {
       if (dropRef.current && !dropRef.current.contains(e.target)) setServicesOpen(false);
+      if (dropRefProducts.current && !dropRefProducts.current.contains(e.target)) setProductsOpen(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
   // Close menu on route change
-  useEffect(() => { setIsMenuOpen(false); setServicesOpen(false); }, [location]);
+  useEffect(() => { setIsMenuOpen(false); setServicesOpen(false); setProductsOpen(false); }, [location]);
 
   // ── FIX CONTACT : scroll vers #contact depuis n'importe quelle page ──
   const handleContactClick = (e) => {
@@ -174,6 +183,73 @@ export default function Header() {
               )}
             </div>
 
+            {/* Produits dropdown */}
+            <div ref={dropRefProducts} style={{ position: 'relative' }}>
+              <button
+                className="nav-link"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: isActive('/produits') ? 'var(--c-text)' : undefined,
+                }}
+                onClick={() => setProductsOpen(!productsOpen)}
+              >
+                Produits
+                <ChevronDown size={12} style={{ transition: 'transform 0.2s', transform: productsOpen ? 'rotate(180deg)' : 'none' }} />
+              </button>
+
+              {productsOpen && (
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 12px)', left: '50%', transform: 'translateX(-50%)',
+                  background: 'var(--c-card)', border: '1px solid var(--c-border)',
+                  padding: '1rem', minWidth: '340px',
+                  boxShadow: '0 20px 48px rgba(10,14,40,0.18)',
+                  zIndex: 100,
+                }}>
+                  <div style={{ height: 2, background: 'linear-gradient(90deg, var(--c-primary), var(--c-secondary), transparent)', marginBottom: '0.875rem' }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--c-border)', marginBottom: '0.875rem' }}>
+                    {productItems.map(({ Icon, label, abbr, to }) => (
+                      <Link key={to} to={to} style={{ textDecoration: 'none' }} onClick={() => setProductsOpen(false)}>
+                        <div
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 10,
+                            padding: '0.875rem 1rem', background: 'var(--c-surface)',
+                            transition: 'background 0.2s', cursor: 'pointer',
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--c-card)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'var(--c-surface)'}
+                        >
+                          <div style={{
+                            width: 28, height: 28, border: '1px solid var(--c-border)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                            background: 'var(--c-primary-bg)',
+                          }}>
+                            <Icon size={13} style={{ color: 'var(--c-primary)' }} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--c-text)', fontWeight: 400 }}>{label}</div>
+                            <div style={{ fontSize: '0.58rem', color: 'var(--c-primary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 500 }}>{abbr}</div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <Link to="/produits" onClick={() => setProductsOpen(false)} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '0.6rem 0.75rem', fontSize: '0.72rem',
+                    color: 'var(--c-primary)', letterSpacing: '0.08em', textTransform: 'uppercase',
+                    background: 'var(--c-primary-bg)', border: '1px solid var(--c-primary-line)',
+                    textDecoration: 'none', transition: 'background 0.2s',
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(30,82,204,0.12)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'var(--c-primary-bg)'}
+                  >
+                    Voir tous nos outils digitaux <ArrowRight size={12} />
+                  </Link>
+                </div>
+              )}
+            </div>
+
             <Link to="/about" className="nav-link" style={isActive('/about') ? { color: 'var(--c-text)' } : {}}>À propos</Link>
             <Link to="/blog" className="nav-link" style={isActive('/blog') ? { color: 'var(--c-text)' } : {}}>Veille Réglementaire</Link>
             <Link to="/client" className="nav-link" style={isActive('/client') ? { color: 'var(--c-text)' } : {}}>
@@ -251,6 +327,7 @@ export default function Header() {
             {[
               { label: 'Accueil', to: '/' },
               { label: 'Services', to: '/services' },
+              { label: 'Produits', to: '/produits' },
               { label: 'À propos', to: '/about' },
               { label: 'Veille Réglementaire', to: '/blog' },
               { label: 'Espace Client', to: '/client' },

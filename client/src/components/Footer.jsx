@@ -13,7 +13,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
 
           {/* ── Brand ── */}
-          <div className="md:col-span-4">
+          <div className="md:col-span-3">
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1.25rem' }}>
               <div style={{ position: 'relative', width: 32, height: 32, flexShrink: 0 }}>
                 <div style={{ width: 32, height: 32, border: '2px solid var(--c-gold)', transform: 'rotate(45deg)', position: 'absolute' }} />
@@ -38,7 +38,7 @@ export default function Footer() {
           </div>
 
           {/* ── Services ── */}
-          <div className="md:col-span-3">
+          <div className="md:col-span-2">
             <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem', fontWeight: 600, color: 'var(--c-white)', letterSpacing: '0.04em', marginBottom: '1.25rem' }}>Nos Services</h4>
             <ul style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
               {[
@@ -48,6 +48,27 @@ export default function Footer() {
                 ['Notice d\'Impact sur l\'Environnement (NIE)', '/services#nie'],
                 ['Suivi Rejets & Émissions', '/services#rejets'],
                 ['Études de Danger & PII', '/services#veille'],
+              ].map(([label, to], i) => (
+                <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                  <span style={{ display: 'inline-block', width: 4, height: 4, background: 'var(--c-gold)', borderRadius: '50%', flexShrink: 0, marginTop: 6 }} />
+                  <Link to={to} style={{ color: 'var(--c-muted)', fontSize: '0.78rem', lineHeight: 1.5, textDecoration: 'none', transition: 'color 0.2s' }}
+                    onMouseEnter={e => e.currentTarget.style.color = 'var(--c-gold)'}
+                    onMouseLeave={e => e.currentTarget.style.color = 'var(--c-muted)'}>
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ── Produits ── */}
+          <div className="md:col-span-2">
+            <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem', fontWeight: 600, color: 'var(--c-white)', letterSpacing: '0.04em', marginBottom: '1.25rem' }}>Nos Produits</h4>
+            <ul style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+              {[
+                ['Reglo+', '/produits#reglo-plus'],
+                ['Produits Chimiques Dangereux', '/produits#chimique'],
+                ['Permis de Travail Digital', '/produits#permis-travail'],
               ].map(([label, to], i) => (
                 <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                   <span style={{ display: 'inline-block', width: 4, height: 4, background: 'var(--c-gold)', borderRadius: '50%', flexShrink: 0, marginTop: 6 }} />

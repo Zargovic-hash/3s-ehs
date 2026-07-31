@@ -41,7 +41,19 @@
   --c-text:     #0d1526;
   --c-text-sec: #243055;
   --c-muted:    #5c6a8a;
-  --c-white:    #9a1a11;
+
+  /* Alias legacy (ancienne palette or/vert) — conservés pour compat.
+     avec les pages existantes qui référencent encore ces noms.
+     --c-white sert de couleur de titre (héritage thème sombre), pas de blanc littéral :
+     la plupart des usages sont des titres sur fond clair, d'où le mappage vers --c-text. */
+  --c-white:      var(--c-text);
+  --c-gold:       var(--c-secondary);
+  --c-gold-bg:    var(--c-secondary-bg);
+  --c-gold-line:  var(--c-secondary-line);
+  --c-accent:     var(--c-primary);
+  --c-accent-bg:  var(--c-primary-bg);
+  --c-accent2:    var(--c-primary-lt);
+
   /* États */
   --c-success:    #16a34a;
   --c-success-bg: rgba(22,163,74,0.07);

@@ -4,7 +4,7 @@ import {
   FileText, CheckCircle, Users, Award,
   BookOpen, Shield, Leaf, TrendingUp, Send, ArrowRight,
   Recycle, Factory, BarChart3, Phone, Mail, MapPin,
-  AlertCircle, CheckCircle2
+  AlertCircle, CheckCircle2, Database, FlaskConical, HardHat
 } from 'lucide-react';
 import { contactService } from '../services/api';
 
@@ -184,6 +184,12 @@ const Home = () => {
         'Filières d\'élimination et valorisation',
       ],
     },
+  ];
+
+  const digitalProducts = [
+    { Icon: Database, name: 'Reglo+', desc: 'Toute la réglementation EHS algérienne, centralisée et pilotée.', to: '/produits#reglo-plus' },
+    { Icon: FlaskConical, name: 'Produits Chimiques Dangereux', desc: "De l'autorisation d'achat au stock disponible, en toute traçabilité.", to: '/produits#chimique' },
+    { Icon: HardHat, name: 'Permis de Travail Digital', desc: 'Sécurisez vos travaux à risque, sans papier ni approximation.', to: '/produits#permis-travail' },
   ];
 
   const stats = [
@@ -496,6 +502,48 @@ const Home = () => {
                 </ul>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ OUTILS DIGITAUX ══════════════════════════════════ */}
+      <section style={{ padding: 'clamp(3.5rem, 7vw, 6rem) 0', background: 'var(--c-surface)', borderTop: '1px solid var(--c-border)', borderBottom: '1px solid var(--c-border)' }}>
+        <div className="container mx-auto px-6 lg:px-8">
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div className="section-label" style={{ justifyContent: 'center' }}>Solutions digitales</div>
+            <h2 className="section-title">
+              Notre expertise, <span>transformée en logiciels</span>
+            </h2>
+            <p className="section-subtitle">
+              Trois outils développés par notre bureau d'études pour piloter votre conformité EHS au quotidien, en autonomie.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+            {digitalProducts.map(({ Icon, name, desc, to }, i) => (
+              <Link key={i} to={to} className="card" style={{ textDecoration: 'none', display: 'block' }}>
+                <div style={{
+                  width: 42, height: 42, border: '1px solid var(--c-border)',
+                  background: 'var(--c-gold-bg)', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', marginBottom: '1.25rem',
+                }}>
+                  <Icon size={18} style={{ color: 'var(--c-gold)' }} />
+                </div>
+                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.15rem', fontWeight: 700, color: 'var(--c-text)', marginBottom: '0.5rem', lineHeight: 1.25 }}>
+                  {name}
+                </h3>
+                <p style={{ color: 'var(--c-muted)', fontSize: '0.83rem', lineHeight: 1.7, marginBottom: '1rem' }}>{desc}</p>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--c-accent2)', fontSize: '0.72rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  En savoir plus <ArrowRight size={12} />
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <Link to="/produits" className="btn-primary">
+              Découvrir tous nos outils digitaux <ArrowRight size={14} />
+            </Link>
           </div>
         </div>
       </section>
